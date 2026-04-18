@@ -301,18 +301,12 @@
       margin-top: 2rem;
     }
 
-    /* ─── EXPORT PANEL ─── */
-    .export-area {
-      background: #1a1612;
-      border-radius: 3px;
-      padding: 1rem 1.25rem;
-      font-family: 'DM Mono', monospace; font-size: .75rem;
-      color: #c8a96e; line-height: 1.6;
-      max-height: 240px; overflow-y: auto;
-      white-space: pre; word-break: break-all;
-      margin: 1.25rem 0;
-      border: 1px solid var(--warm-dim);
+    /* ─── EXPORT ACTIONS ─── */
+    .export-actions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .75rem;
+      margin-top: 1.75rem;
     }
+    .export-actions .btn { justify-content: center; padding: .7rem 1rem; font-size: .8rem; }
 
     /* ─── TOAST ─── */
     .toast-container {
@@ -426,10 +420,33 @@
     }
 
     @media (max-width: 600px) {
-      .stats-bar { gap:1.25rem; }
-      .form-row { grid-template-columns:1fr; }
       header { padding: 0 1rem; }
-      .logo-text { display:none; }
+      .logo-text { display: none; }
+      .stats-bar { gap: 1.25rem; }
+      .form-row { grid-template-columns: 1fr; }
+      main { padding-top: 2rem; padding-bottom: 4rem; }
+
+      /* Icon-only buttons in header on mobile */
+      .btn .btn-label { display: none; }
+      .btn { padding: .45rem .65rem; }
+      .header-actions { gap: .5rem; }
+
+      /* Mobile search: drop a full-width bar over the logo area instead of expanding left */
+      .header-search.open .header-search-input {
+        position: fixed;
+        top: 14px;
+        left: 1rem;
+        /* right edge = search toggle (36px) + right padding (1rem=16px) + gap (.5rem=8px) */
+        right: calc(36px + 16px + 8px);
+        width: auto;
+        transform: none;
+      }
+
+      /* Cards: always show actions on mobile (no hover) */
+      .quote-actions { opacity: 1; }
+
+      /* Modal full-width on mobile */
+      .modal { padding: 1.75rem 1.25rem; }
     }
   </style>
 </head>
@@ -463,13 +480,13 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M8 1v9M4 7l4 4 4-4M2 12v2h12v-2"/>
       </svg>
-      导出配置
+      <span class="btn-label">导出配置</span>
     </button>
     <button class="btn btn-primary" onclick="openAdd()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M8 2v12M2 8h12"/>
       </svg>
-      添加金句
+      <span class="btn-label">添加金句</span>
     </button>
   </div>
 </header>
@@ -541,13 +558,27 @@
       </svg>
       导出 quotes.js
     </div>
-    <p style="font-size:.85rem;color:var(--muted);line-height:1.6;">
-      复制以下内容，替换项目中的 <code style="font-family:'DM Mono',monospace;color:var(--warm)">quotes.js</code> 文件后重新部署，即可永久保存。
+    <p style="font-size:.88rem;color:var(--muted);line-height:1.75;">
+      将当前所有金句导出为新的配置文件。用它替换项目中的
+      <code style="font-family:'DM Mono',monospace;color:var(--warm);font-size:.82rem">quotes.js</code>
+      并重新部署，即可永久保存所有改动。
     </p>
-    <div class="export-area" id="export-content"></div>
-    <div class="modal-footer">
+    <div class="export-actions">
+      <button class="btn btn-ghost" onclick="copyExport()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="5" y="5" width="9" height="9" rx="1"/><path d="M10 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h2"/>
+        </svg>
+        复制到剪贴板
+      </button>
+      <button class="btn btn-primary" onclick="downloadExport()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 1v9M4 7l4 4 4-4M2 12v2h12v-2"/>
+        </svg>
+        直接下载
+      </button>
+    </div>
+    <div class="modal-footer" style="margin-top:1.25rem;">
       <button class="btn btn-ghost" onclick="closeModal('export-modal')">关闭</button>
-      <button class="btn btn-primary" onclick="copyExport()">复制到剪贴板</button>
     </div>
   </div>
 </div>
@@ -556,15 +587,15 @@
 <footer>
   <div class="footer-links">
     <!-- ✏️ 将 href 替换为你的个人主页地址，将「你的名字」替换为署名 -->
-    <a class="footer-author" href="https://minecraftxfj.top" target="_blank" rel="noopener">
+    <a class="footer-author" href="https://your-website.com" target="_blank" rel="noopener">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
       </svg>
-      Minecraft雪峰君
+      你的名字
     </a>
     <div class="footer-dot"></div>
     <!-- ✏️ 将 href 替换为你的 GitHub 项目地址 -->
-    <a class="footer-github" href="https://github.com/XFJ-YYQF/Golden-Sentence-Collection" target="_blank" rel="noopener">
+    <a class="footer-github" href="https://github.com/your-username/your-repo" target="_blank" rel="noopener">
       <svg viewBox="0 0 16 16" fill="currentColor">
         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
           0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
@@ -745,17 +776,35 @@ function deleteQuote(id) {
 }
 
 // ─── EXPORT ─────────────────────────────────────────────────────────
-function openExport() {
+let _exportContent = '';
+
+function buildExportContent() {
   const deleted = new Set(getDeletedIds());
   const visible = allQuotes.filter(q => !deleted.has(q.id));
-  const js = `/**\n * 金句配置文件\n * 由「金句录」自动生成 ${new Date().toISOString().slice(0,10)}\n */\n\nwindow.QUOTES_CONFIG = ${JSON.stringify(visible, null, 2)};\n`;
-  document.getElementById('export-content').textContent = js;
+  return `/**\n * 金句配置文件\n * 由「金句录」自动生成 ${new Date().toISOString().slice(0,10)}\n */\n\nwindow.QUOTES_CONFIG = ${JSON.stringify(visible, null, 2)};\n`;
+}
+
+function openExport() {
+  _exportContent = buildExportContent();
   openModal('export-modal');
 }
 
 function copyExport() {
-  const txt = document.getElementById('export-content').textContent;
-  navigator.clipboard.writeText(txt).then(() => toast('已复制到剪贴板 ✓'));
+  navigator.clipboard.writeText(_exportContent).then(() => {
+    toast('已复制到剪贴板 ✓');
+    closeModal('export-modal');
+  });
+}
+
+function downloadExport() {
+  const blob = new Blob([_exportContent], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'quotes.js';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('下载已开始 ↓');
+  closeModal('export-modal');
 }
 
 // ─── MODAL ──────────────────────────────────────────────────────────
