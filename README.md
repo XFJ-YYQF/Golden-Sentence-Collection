@@ -8,4 +8,4 @@ Vercel/Cloudflare Pages 直接部署即可
 
 都是 Claude 干的（恼
 
-Claude大人我会忠诚你一辈子的哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+Claude 大人我会忠诚你一辈子的哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
