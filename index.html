@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>金句录</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="quotes.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #1a1612;
+      --paper:     #f5f0e8;
+      --cream:     #ede7d9;
+      --warm:      #c8a96e;
+      --warm-dim:  #a8895a;
+      --warm-pale: #f0e6cc;
+      --rust:      #9b4a2e;
+      --muted:     #7a6f60;
+      --border:    #d5cabb;
+      --shadow:    rgba(26,22,18,.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Serif SC', serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE TEXTURE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--ink);
+      padding: 0 clamp(1.5rem,5vw,4rem);
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      border-bottom: 2px solid var(--warm);
+      box-shadow: 0 2px 20px rgba(0,0,0,.3);
+    }
+
+    .header-logo {
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .logo-glyph {
+      width: 36px; height: 36px;
+      background: var(--warm);
+      color: var(--ink);
+      font-size: 1.1rem; font-weight: 600;
+      display: grid; place-items: center;
+      border-radius: 2px;
+      font-family: 'Lora', serif;
+      font-style: italic;
+    }
+    .logo-text {
+      color: var(--paper);
+      font-size: 1.15rem; letter-spacing: .12em;
+    }
+
+    .header-actions { display: flex; gap: .75rem; align-items: center; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .45rem 1.1rem;
+      border: 1.5px solid; border-radius: 2px;
+      font-size: .78rem; font-family: 'DM Mono', monospace;
+      letter-spacing: .06em; cursor: pointer;
+      transition: all .2s; text-transform: uppercase;
+      font-weight: 500;
+    }
+    .btn-ghost {
+      background: transparent; border-color: var(--warm-dim); color: var(--warm);
+    }
+    .btn-ghost:hover { background: var(--warm); color: var(--ink); border-color: var(--warm); }
+    .btn-primary {
+      background: var(--warm); border-color: var(--warm); color: var(--ink);
+    }
+    .btn-primary:hover { background: var(--warm-dim); border-color: var(--warm-dim); }
+    .btn-danger {
+      background: transparent; border-color: #8b3a2a; color: #c0604a;
+    }
+    .btn-danger:hover { background: var(--rust); border-color: var(--rust); color: #fff; }
+    .btn svg { width:14px; height:14px; flex-shrink:0; }
+
+    /* ─── MAIN LAYOUT ─── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem clamp(1.5rem,5vw,4rem) 6rem;
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: flex; align-items: center; gap: 2rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat { display: flex; flex-direction: column; gap: .15rem; }
+    .stat-num {
+      font-family: 'Lora', serif; font-size: 2rem; font-weight: 600;
+      color: var(--warm); line-height: 1;
+    }
+    .stat-label { font-size: .7rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .stats-bar .divider { width:1px; height:36px; background:var(--border); }
+
+    /* ─── FILTER STRIP ─── */
+    .filter-strip {
+      display: flex; gap: .5rem; flex-wrap: wrap;
+      margin-bottom: 2.5rem; align-items: center;
+    }
+    .filter-label { font-size: .7rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-right:.3rem; }
+    .tag-pill {
+      padding: .3rem .85rem;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: .75rem; font-family: 'DM Mono', monospace;
+      cursor: pointer; color: var(--muted);
+      transition: all .15s;
+      background: transparent;
+    }
+    .tag-pill:hover { border-color: var(--warm); color: var(--warm); }
+    .tag-pill.active { background: var(--warm); border-color: var(--warm); color: var(--ink); font-weight: 500; }
+
+    /* ─── SEARCH ─── */
+    .search-row {
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .search-row svg {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      color: var(--muted); width:15px; height:15px; pointer-events:none;
+    }
+    .search-input {
+      width: 100%;
+      padding: .75rem 1rem .75rem 2.7rem;
+      background: var(--cream);
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      font-family: 'Noto Serif SC', serif;
+      font-size: .9rem; color: var(--ink);
+      outline: none; transition: border-color .2s;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--warm); }
+
+    /* ─── QUOTE GRID ─── */
+    .quote-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+      gap: 1.5rem;
+    }
+
+    .quote-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.75rem 1.5rem 1.25rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      position: relative; overflow: hidden;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      animation: fadeUp .4s ease both;
+    }
+    .quote-card::before {
+      content: '\201C';
+      position: absolute; top: -.5rem; left: .75rem;
+      font-family: 'Lora', serif; font-size: 6rem;
+      color: var(--warm); opacity: .12; line-height: 1;
+      pointer-events: none;
+    }
+    .quote-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--shadow);
+      border-color: var(--warm-dim);
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .quote-text {
+      font-size: 1rem; line-height: 1.85;
+      color: var(--ink); font-weight: 400;
+      flex: 1;
+    }
+
+    .quote-footer {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: .5rem;
+    }
+    .quote-meta { display: flex; flex-direction: column; gap: .3rem; }
+    .quote-author {
+      font-family: 'Lora', serif; font-style: italic;
+      font-size: .85rem; color: var(--warm-dim);
+    }
+    .quote-author::before { content: '— '; }
+    .quote-date {
+      font-family: 'DM Mono', monospace; font-size: .68rem;
+      color: var(--muted); letter-spacing:.03em;
+    }
+
+    .quote-tag {
+      padding: .2rem .6rem;
+      border: 1px solid var(--border);
+      border-radius: 99px; font-size: .68rem;
+      font-family: 'DM Mono', monospace; color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .quote-actions {
+      display: flex; gap: .35rem; opacity: 0; transition: opacity .2s;
+    }
+    .quote-card:hover .quote-actions { opacity: 1; }
+    .icon-btn {
+      width: 28px; height: 28px; border-radius: 2px;
+      display: grid; place-items: center; cursor: pointer;
+      border: 1px solid var(--border); background: var(--paper);
+      color: var(--muted); transition: all .15s;
+    }
+    .icon-btn:hover { border-color: var(--warm); color: var(--warm); }
+    .icon-btn.del:hover { border-color: var(--rust); color: var(--rust); }
+    .icon-btn svg { width:13px; height:13px; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty {
+      grid-column: 1/-1;
+      text-align: center; padding: 5rem 2rem;
+      color: var(--muted);
+    }
+    .empty-glyph { font-size: 3rem; opacity:.3; margin-bottom: 1rem; }
+    .empty p { font-size: .9rem; }
+
+    /* ─── MODAL ─── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(26,22,18,.65);
+      backdrop-filter: blur(3px);
+      z-index: 500;
+      display: grid; place-items: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s;
+    }
+    .modal-backdrop.open { opacity:1; pointer-events: all; }
+
+    .modal {
+      background: var(--paper);
+      border: 1.5px solid var(--warm-dim);
+      border-radius: 4px;
+      width: min(560px, calc(100vw - 2rem));
+      padding: 2.5rem;
+      transform: translateY(20px);
+      transition: transform .25s;
+      box-shadow: 0 24px 80px rgba(0,0,0,.25);
+    }
+    .modal-backdrop.open .modal { transform: translateY(0); }
+
+    .modal-title {
+      font-family: 'Lora', serif; font-size: 1.4rem;
+      color: var(--ink); margin-bottom: 1.75rem;
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .modal-title svg { color: var(--warm); width:20px; height:20px; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label {
+      display: block; font-size: .7rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: .45rem; font-family: 'DM Mono', monospace;
+    }
+    .form-control {
+      width: 100%;
+      background: var(--cream);
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: .65rem .9rem;
+      font-family: 'Noto Serif SC', serif;
+      font-size: .9rem; color: var(--ink);
+      outline: none; transition: border-color .2s;
+      resize: vertical;
+    }
+    .form-control:focus { border-color: var(--warm); }
+    .form-control::placeholder { color: #b0a898; }
+    .form-row { display: grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: .75rem;
+      margin-top: 2rem;
+    }
+
+    /* ─── EXPORT PANEL ─── */
+    .export-area {
+      background: #1a1612;
+      border-radius: 3px;
+      padding: 1rem 1.25rem;
+      font-family: 'DM Mono', monospace; font-size: .75rem;
+      color: #c8a96e; line-height: 1.6;
+      max-height: 240px; overflow-y: auto;
+      white-space: pre; word-break: break-all;
+      margin: 1.25rem 0;
+      border: 1px solid var(--warm-dim);
+    }
+
+    /* ─── TOAST ─── */
+    .toast-container {
+      position: fixed; bottom: 2rem; right: 2rem;
+      z-index: 9000; display: flex; flex-direction: column; gap: .5rem;
+    }
+    .toast {
+      background: var(--ink); color: var(--paper);
+      padding: .7rem 1.2rem;
+      border-radius: 3px; font-size: .8rem;
+      border-left: 3px solid var(--warm);
+      box-shadow: 0 4px 20px rgba(0,0,0,.3);
+      animation: toastIn .3s ease;
+      font-family: 'DM Mono', monospace;
+    }
+    @keyframes toastIn {
+      from { opacity:0; transform:translateX(20px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--cream); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--warm-dim); }
+
+    @media (max-width: 600px) {
+      .stats-bar { gap:1.25rem; }
+      .form-row { grid-template-columns:1fr; }
+      header { padding: 0 1rem; }
+      .logo-text { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="header-logo">
+    <div class="logo-glyph">「」</div>
+    <span class="logo-text">金句录</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="openExport()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 1v9M4 7l4 4 4-4M2 12v2h12v-2"/>
+      </svg>
+      导出配置
+    </button>
+    <button class="btn btn-primary" onclick="openAdd()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 2v12M2 8h12"/>
+      </svg>
+      添加金句
+    </button>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num" id="stat-total">0</span>
+      <span class="stat-label">总计</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <span class="stat-num" id="stat-tags">0</span>
+      <span class="stat-label">分类</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <span class="stat-num" id="stat-today">0</span>
+      <span class="stat-label">今日新增</span>
+    </div>
+  </div>
+
+  <!-- Tags filter -->
+  <div class="filter-strip" id="filter-strip">
+    <span class="filter-label">筛选</span>
+    <button class="tag-pill active" data-tag="all" onclick="filterTag('all',this)">全部</button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-row">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/>
+    </svg>
+    <input class="search-input" id="search" placeholder="搜索金句、作者或标签…" oninput="render()" />
+  </div>
+
+  <!-- Grid -->
+  <div class="quote-grid" id="quote-grid"></div>
+</main>
+
+<!-- ═══ ADD MODAL ═══ -->
+<div class="modal-backdrop" id="add-modal" onclick="closeOnBackdrop(event,'add-modal')">
+  <div class="modal">
+    <div class="modal-title">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>
+      添加金句
+    </div>
+    <div class="form-group">
+      <label class="form-label">金句正文 *</label>
+      <textarea class="form-control" id="f-text" rows="4" placeholder="写下让你心动的句子…"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">作者 / 来源</label>
+        <input class="form-control" id="f-author" type="text" placeholder="如：加缪" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">标签</label>
+        <input class="form-control" id="f-tag" type="text" placeholder="如：哲学" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('add-modal')">取消</button>
+      <button class="btn btn-primary" onclick="addQuote()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EXPORT MODAL ═══ -->
+<div class="modal-backdrop" id="export-modal" onclick="closeOnBackdrop(event,'export-modal')">
+  <div class="modal">
+    <div class="modal-title">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 3H5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V8m-4-5h4v4M10 12l4-4"/>
+      </svg>
+      导出 quotes.js
+    </div>
+    <p style="font-size:.85rem;color:var(--muted);line-height:1.6;">
+      复制以下内容，替换项目中的 <code style="font-family:'DM Mono',monospace;color:var(--warm)">quotes.js</code> 文件后重新部署，即可永久保存。
+    </p>
+    <div class="export-area" id="export-content"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('export-modal')">关闭</button>
+      <button class="btn btn-primary" onclick="copyExport()">复制到剪贴板</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ─── DATA ──────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'jinjulu_quotes';
+
+// Merge config quotes + localStorage quotes (deduplicate by id)
+function loadAll() {
+  const base = (window.QUOTES_CONFIG || []);
+  let local = [];
+  try { local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){}
+  const map = new Map();
+  base.forEach(q => map.set(q.id, q));
+  local.forEach(q => map.set(q.id, q));
+  return Array.from(map.values()).sort((a,b) => (b.date||'') > (a.date||'') ? 1 : -1);
+}
+
+function saveLocal(quotes) {
+  // Save only those NOT in the original config (user-added)
+  const configIds = new Set((window.QUOTES_CONFIG||[]).map(q=>q.id));
+  const localOnly = quotes.filter(q => !configIds.has(q.id));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(localOnly));
+}
+
+function getDeletedIds() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY + '_deleted') || '[]'); } catch(e){ return []; }
+}
+function addDeletedId(id) {
+  const ids = getDeletedIds();
+  if (!ids.includes(id)) ids.push(id);
+  localStorage.setItem(STORAGE_KEY + '_deleted', JSON.stringify(ids));
+}
+
+let allQuotes = [];
+let activeTag = 'all';
+
+// ─── RENDER ─────────────────────────────────────────────────────────
+function render() {
+  const deleted = new Set(getDeletedIds());
+  const query = document.getElementById('search').value.trim().toLowerCase();
+
+  let list = allQuotes.filter(q => !deleted.has(q.id));
+
+  if (activeTag !== 'all') list = list.filter(q => q.tag === activeTag);
+  if (query) list = list.filter(q =>
+    q.text.toLowerCase().includes(query) ||
+    (q.author||'').toLowerCase().includes(query) ||
+    (q.tag||'').toLowerCase().includes(query)
+  );
+
+  const grid = document.getElementById('quote-grid');
+  grid.innerHTML = '';
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty">
+      <div class="empty-glyph">「 」</div>
+      <p>${query ? '没有找到匹配的金句' : '暂无金句，点击右上角添加第一条'}</p>
+    </div>`;
+    return;
+  }
+
+  list.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'quote-card';
+    card.style.animationDelay = `${i * 0.04}s`;
+    card.innerHTML = `
+      <div class="quote-text">${escHtml(q.text)}</div>
+      <div class="quote-footer">
+        <div class="quote-meta">
+          ${q.author ? `<span class="quote-author">${escHtml(q.author)}</span>` : ''}
+          ${q.date   ? `<span class="quote-date">${q.date}</span>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          ${q.tag ? `<span class="quote-tag">${escHtml(q.tag)}</span>` : ''}
+          <div class="quote-actions">
+            <button class="icon-btn" title="复制" onclick="copyText(${JSON.stringify(q.text)})">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="5" y="5" width="9" height="9" rx="1"/><path d="M10 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h2"/>
+              </svg>
+            </button>
+            <button class="icon-btn del" title="删除" onclick="deleteQuote('${q.id}')">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 4h10M6 4V2h4v2M13 4l-.8 9a1 1 0 01-1 .9H4.8a1 1 0 01-1-.9L3 4"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function updateStats() {
+  const deleted = new Set(getDeletedIds());
+  const visible = allQuotes.filter(q => !deleted.has(q.id));
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('stat-total').textContent = visible.length;
+  document.getElementById('stat-tags').textContent = new Set(visible.map(q=>q.tag).filter(Boolean)).size;
+  document.getElementById('stat-today').textContent = visible.filter(q=>q.date===today).length;
+}
+
+function buildTagPills() {
+  const deleted = new Set(getDeletedIds());
+  const visible = allQuotes.filter(q => !deleted.has(q.id));
+  const tags = [...new Set(visible.map(q=>q.tag).filter(Boolean))].sort();
+  const strip = document.getElementById('filter-strip');
+  // Keep "全部" pill
+  const pills = strip.querySelectorAll('.tag-pill:not([data-tag="all"])');
+  pills.forEach(p => p.remove());
+  tags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'tag-pill' + (activeTag === tag ? ' active' : '');
+    btn.dataset.tag = tag;
+    btn.textContent = tag;
+    btn.onclick = () => filterTag(tag, btn);
+    strip.appendChild(btn);
+  });
+}
+
+function filterTag(tag, el) {
+  activeTag = tag;
+  document.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+// ─── CRUD ───────────────────────────────────────────────────────────
+function addQuote() {
+  const text = document.getElementById('f-text').value.trim();
+  if (!text) { shake('f-text'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  const q = {
+    id: 'q' + Date.now(),
+    text,
+    author: document.getElementById('f-author').value.trim(),
+    tag:    document.getElementById('f-tag').value.trim(),
+    date:   today
+  };
+  allQuotes.unshift(q);
+  saveLocal(allQuotes);
+  buildTagPills();
+  updateStats();
+  render();
+  closeModal('add-modal');
+  toast('金句已收录 ✦');
+}
+
+function deleteQuote(id) {
+  addDeletedId(id);
+  allQuotes = allQuotes.filter(q => q.id !== id);
+  saveLocal(allQuotes);
+  buildTagPills();
+  updateStats();
+  render();
+  toast('已删除');
+}
+
+// ─── EXPORT ─────────────────────────────────────────────────────────
+function openExport() {
+  const deleted = new Set(getDeletedIds());
+  const visible = allQuotes.filter(q => !deleted.has(q.id));
+  const js = `/**\n * 金句配置文件\n * 由「金句录」自动生成 ${new Date().toISOString().slice(0,10)}\n */\n\nwindow.QUOTES_CONFIG = ${JSON.stringify(visible, null, 2)};\n`;
+  document.getElementById('export-content').textContent = js;
+  openModal('export-modal');
+}
+
+function copyExport() {
+  const txt = document.getElementById('export-content').textContent;
+  navigator.clipboard.writeText(txt).then(() => toast('已复制到剪贴板 ✓'));
+}
+
+// ─── MODAL ──────────────────────────────────────────────────────────
+function openAdd() {
+  ['f-text','f-author','f-tag'].forEach(id => document.getElementById(id).value='');
+  openModal('add-modal');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openExportModal() { openModal('export-modal'); }
+function closeOnBackdrop(e, id) { if (e.target.id === id) closeModal(id); }
+
+// ─── UTILITIES ──────────────────────────────────────────────────────
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => toast('已复制 ✓'));
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function shake(id) {
+  const el = document.getElementById(id);
+  el.style.animation = 'none';
+  el.style.borderColor = 'var(--rust)';
+  setTimeout(() => el.style.borderColor = '', 800);
+}
+
+function toast(msg) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal('add-modal'); closeModal('export-modal');
+  }
+  if ((e.metaKey||e.ctrlKey) && e.key === 'k') {
+    e.preventDefault(); document.getElementById('search').focus();
+  }
+});
+
+// ─── INIT ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  allQuotes = loadAll();
+  buildTagPills();
+  updateStats();
+  render();
+});
+</script>
+</body>
+</html>
