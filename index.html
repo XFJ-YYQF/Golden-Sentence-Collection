@@ -418,6 +418,13 @@
       width: 3px; height: 3px; border-radius: 50%;
       background: var(--border);
     }
+    .footer-powered {
+      font-family: 'DM Mono', monospace; font-size: .7rem;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--border); text-decoration: none;
+      transition: color .2s;
+    }
+    .footer-powered:hover { color: var(--warm); }
 
     @media (max-width: 600px) {
       header { padding: 0 1rem; }
@@ -587,15 +594,15 @@
 <footer>
   <div class="footer-links">
     <!-- ✏️ 将 href 替换为你的个人主页地址，将「你的名字」替换为署名 -->
-    <a class="footer-author" href="https://minecraftxfj.top" target="_blank" rel="noopener">
+    <a class="footer-author" href="https://your-website.com" target="_blank" rel="noopener">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
       </svg>
-      Minecraft雪峰君
+      你的名字
     </a>
     <div class="footer-dot"></div>
     <!-- ✏️ 将 href 替换为你的 GitHub 项目地址 -->
-    <a class="footer-github" href="https://github.com/XFJ-YYQF/Golden-Sentence-Collection" target="_blank" rel="noopener">
+    <a class="footer-github" href="https://github.com/your-username/your-repo" target="_blank" rel="noopener">
       <svg viewBox="0 0 16 16" fill="currentColor">
         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
           0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
@@ -609,6 +616,9 @@
       GitHub
     </a>
   </div>
+  <a class="footer-powered" href="https://claude.ai" target="_blank" rel="noopener">
+    Powered by Claude
+  </a>
 </footer>
 
 <!-- ═══ TOAST ═══ -->
@@ -618,7 +628,7 @@
 // ─── DATA ──────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'jinjulu_quotes';
 
-// Merge config quotes + localStorage quotes (deduplicate by id)
+// Merge config quotes + localStorage quotes (deduplicate by id), then shuffle
 function loadAll() {
   const base = (window.QUOTES_CONFIG || []);
   let local = [];
@@ -626,7 +636,13 @@ function loadAll() {
   const map = new Map();
   base.forEach(q => map.set(q.id, q));
   local.forEach(q => map.set(q.id, q));
-  return Array.from(map.values()).sort((a,b) => (b.date||'') > (a.date||'') ? 1 : -1);
+  const arr = Array.from(map.values());
+  // Fisher-Yates shuffle — new order every page load
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 function saveLocal(quotes) {
