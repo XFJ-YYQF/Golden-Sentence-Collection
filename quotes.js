@@ -8,14 +8,14 @@ window.QUOTES_CONFIG = [
     "id": "q1776484404247",
     "text": "私のオナニーを見て下さいっ！",
     "author": "绫地宁宁",
-    "tag": "GalGame",
+    "tag": "其他",
     "date": "2026-04-18"
   },
   {
     "id": "q1776484108197",
     "text": "We shall never surrender！",
     "author": "丘吉尔",
-    "tag": "名人",
+    "tag": "其他",
     "date": "2026-04-18"
   },
   {
