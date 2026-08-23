@@ -1,0 +1,19 @@
+name = "golden-sentence-collection"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "."
+
+# Binds the KV namespace so `wrangler pages dev` works locally too.
+# Replace `id` with your namespace's actual ID (shown after you run
+# `wrangler kv namespace create QUOTES_KV`). This file is only used
+# for local dev / `wrangler pages deploy` — if you deploy by
+# connecting the GitHub repo in the Cloudflare dashboard instead, set
+# the same binding there under Settings > Functions > KV namespace
+# bindings.
+[[kv_namespaces]]
+binding = "QUOTES_KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+# ADMIN_KEY is a secret, not a plaintext var — set it with:
+#   wrangler pages secret put ADMIN_KEY
+# or in the dashboard under Settings > Environment variables (mark it
+# "Encrypt"). Do not add it to this file.

@@ -1,0 +1,36 @@
+# Cloudflare Pages reads this file automatically on deploy. It sets
+# two things a <meta> tag in index.html cannot:
+#   1) real HTTP caching headers (browsers ignore <meta http-equiv="Cache-Control">)
+#   2) framing/sniffing/referrer protections that only work as headers
+
+# Fonts are static, hash-free assets — cache them for a week.
+/fonts/*
+  Cache-Control: public, max-age=604800, immutable
+
+/fonts.css
+  Cache-Control: public, max-age=86400
+
+# HTML should always revalidate so edits/deploys show up immediately
+# instead of being served stale from cache.
+/index.html
+  Cache-Control: no-cache
+
+# The admin dashboard: never cache it, and keep it out of search
+# indexes even though the meta tag in admin/index.html already says
+# the same thing — belt and suspenders costs nothing here.
+/admin/*
+  Cache-Control: no-cache
+  X-Robots-Tag: noindex, nofollow
+
+# Quote data is dynamic and per-request from KV — never cache it, at
+# the edge or in the browser, or an add/delete could appear to "not
+# have happened" until a cache expires.
+/api/*
+  Cache-Control: no-store
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains

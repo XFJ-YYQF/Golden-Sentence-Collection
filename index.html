@@ -4,11 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>金句录</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none';" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Only the exact weights actually used by the intro block (h1:700,
+       h1-sub:500, eyebrow:700, subtitle:400) are requested — trimmed
+       from 9 font files down to 4 to cut third-party payload. -->
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="fonts.css" />
-  <script src="quotes.js"></script>
+  <!-- Preload only the small latin subset (~18KB) of the body font so
+       ASCII/punctuation paints immediately without FOIT; the much
+       larger CJK subset (~1.5MB) is intentionally NOT preloaded so it
+       doesn't compete with the critical render path — it swaps in
+       once it arrives (font-display: swap in fonts.css). -->
+  <link rel="preload" as="font" type="font/woff2" href="fonts/noto-serif-sc-latin-400-normal.woff2" crossorigin>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,8 +27,6 @@
       --accent:      #39C5BB;
       --accent-dark: #1FA69C;
       --accent-tint: #E6FAF8;
-      --danger:      #c0604a;
-      --danger-dark: #9b4a2e;
       --ink:      #1a1f1e;
       --paper:    #faf9f6;
       --cream:    #ffffff;
@@ -27,6 +35,10 @@
       --hover-bg: #f2f9f8;
       --shadow:   0 10px 30px -12px rgba(20,32,31,.14);
       --ease:     cubic-bezier(.22,.9,.32,1);
+      /* Content width scales with the viewport instead of stopping at
+         a fixed pixel value, so wide and ultrawide screens do not end
+         up with large unused margins on either side. */
+      --content-max: 1320px;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -57,7 +69,7 @@
 
     a, button { -webkit-tap-highlight-color: transparent; }
 
-    /* ─── Stagger fade-in (driven by --i custom property) ─── */
+    /* Stagger fade-in, driven by the --i custom property */
     .fade-in {
       opacity: 0;
       transform: translateY(14px);
@@ -71,9 +83,9 @@
       html { scroll-behavior: auto; }
     }
 
-    /* ─── TOP ROW (intro + actions, top-aligned) ─── */
+    /* Top row: intro + actions, top-aligned */
     .top-row {
-      max-width: 1100px;
+      max-width: min(var(--content-max), 96vw);
       margin: 0 auto;
       padding: clamp(1.75rem,5vw,2.75rem) clamp(1.25rem,5vw,3rem) 0;
       display: flex; align-items: flex-start; justify-content: space-between;
@@ -96,16 +108,16 @@
     .btn-ghost:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: transparent; background: var(--hover-bg); }
     .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow); background: var(--accent-dark); border-color: var(--accent-dark); }
-    .btn svg { width:14px; height:14px; flex-shrink:0; }
+    .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-    /* ─── MAIN LAYOUT ─── */
+    /* Main layout */
     main {
-      max-width: 1100px;
+      max-width: min(var(--content-max), 96vw);
       margin: 0 auto;
       padding: 0 clamp(1.25rem,5vw,3rem) 6rem;
     }
 
-    /* ─── INTRO (typography matches the friendlinks/donation page topbar) ─── */
+    /* Intro: typography matches the friendlinks/donation page topbar */
     .intro { max-width: 480px; font-family: 'Nunito', 'Noto Sans SC', sans-serif; }
     .eyebrow {
       font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
@@ -124,14 +136,14 @@
       color: var(--muted); margin-bottom: 16px; font-family: 'DM Mono', monospace;
     }
 
-    /* ─── STATS BAR ─── */
+    /* Stats bar */
     .stats-bar { display: flex; align-items: center; gap: 2rem; margin-bottom: 30px; }
     .stat { display: flex; flex-direction: column; gap: .2rem; }
     .stat-num { font-family: 'Lora', serif; font-size: 1.9rem; font-weight: 600; color: var(--accent-dark); line-height: 1; }
     .stat-label { font-size: .68rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
     .stats-bar .divider { width: 1px; height: 32px; background: var(--border); }
 
-    /* ─── FILTER STRIP ─── */
+    /* Filter strip */
     .filter-strip { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 22px; align-items: center; }
     .tag-pill {
       padding: .32rem .9rem;
@@ -145,10 +157,10 @@
     .tag-pill:hover { border-color: var(--accent); color: var(--accent-dark); }
     .tag-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
 
-    /* ─── QUOTE GRID ─── */
+    /* Quote grid */
     .quote-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
       gap: 1.1rem;
     }
 
@@ -162,6 +174,12 @@
       transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
       animation: up .5s var(--ease) both;
       animation-delay: calc(var(--i, 0) * .045s);
+      /* Skip layout and paint work for cards outside the viewport; a
+         real win once a collection grows into the hundreds. The
+         contain-intrinsic-size estimate keeps scroll position stable
+         before an off-screen card has actually been measured. */
+      content-visibility: auto;
+      contain-intrinsic-size: 0 260px;
     }
     .quote-card::before {
       content: '\201C';
@@ -177,7 +195,7 @@
     .quote-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: .5rem; }
     .quote-meta { display: flex; flex-direction: column; gap: .3rem; }
     .quote-author { font-family: 'Lora', serif; font-style: italic; font-size: .85rem; color: var(--accent-dark); }
-    .quote-author::before { content: '— '; }
+    .quote-author::before { content: '\2014 '; }
     .quote-date { font-family: 'DM Mono', monospace; font-size: .66rem; color: var(--muted); letter-spacing: .03em; }
 
     .quote-tag {
@@ -194,66 +212,14 @@
       color: var(--muted); transition: all .15s var(--ease);
     }
     .icon-btn:hover { border-color: var(--accent); color: var(--accent-dark); transform: translateY(-1px); }
-    .icon-btn.del:hover { border-color: var(--danger); color: var(--danger); }
     .icon-btn svg { width: 13px; height: 13px; }
 
-    /* ─── EMPTY STATE ─── */
+    /* Empty state */
     .empty { grid-column: 1/-1; text-align: center; padding: 5rem 2rem; color: var(--muted); }
     .empty-glyph { font-size: 3rem; opacity: .3; margin-bottom: 1rem; }
     .empty p { font-size: .9rem; }
 
-    /* ─── MODAL ─── */
-    .modal-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(15,22,21,.5);
-      backdrop-filter: blur(3px);
-      z-index: 500;
-      display: grid; place-items: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity .25s var(--ease);
-    }
-    .modal-backdrop.open { opacity: 1; pointer-events: all; }
-
-    .modal {
-      background: var(--cream);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      width: min(560px, calc(100vw - 2rem));
-      padding: 2.25rem;
-      transform: translateY(20px);
-      transition: transform .25s var(--ease);
-      box-shadow: var(--shadow);
-    }
-    .modal-backdrop.open .modal { transform: translateY(0); }
-
-    .modal-title {
-      font-family: 'Lora', serif; font-size: 1.3rem; color: var(--ink);
-      margin-bottom: 1.6rem; display: flex; align-items: center; gap: .6rem;
-    }
-    .modal-title svg { color: var(--accent); width: 19px; height: 19px; }
-
-    .form-group { margin-bottom: 1.2rem; }
-    .form-label {
-      display: block; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: .4rem; font-family: 'DM Mono', monospace;
-    }
-    .form-control {
-      width: 100%; background: var(--paper); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: .6rem .85rem;
-      font-family: 'Noto Serif SC', serif; font-size: .9rem; color: var(--ink);
-      outline: none; transition: border-color .2s; resize: vertical;
-    }
-    .form-control:focus { border-color: var(--accent); }
-    .form-control::placeholder { color: var(--muted); opacity: .7; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-    .modal-footer { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.8rem; }
-
-    /* ─── EXPORT ACTIONS ─── */
-    .export-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-top: 1.6rem; }
-    .export-actions .btn { justify-content: center; padding: .7rem 1rem; font-size: .78rem; }
-
-    /* ─── TOAST ─── */
+    /* Toast */
     .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 9000; display: flex; flex-direction: column; gap: .5rem; }
     .toast {
       background: var(--cream); color: var(--ink);
@@ -264,13 +230,13 @@
     }
     @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
-    /* ─── SCROLLBAR ─── */
+    /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--paper); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-    /* ─── HEADER SEARCH ─── */
+    /* Header search */
     .header-search { position: relative; display: flex; align-items: center; }
     .search-toggle {
       width: 38px; height: 38px; display: grid; place-items: center;
@@ -300,7 +266,7 @@
 
     .hl { background: var(--accent-tint); color: var(--accent-dark); border-radius: 3px; padding: 0 1px; }
 
-    /* ─── FOOTER ─── */
+    /* Footer */
     footer {
       text-align: center; padding: 2.5rem 1rem 3rem;
       border-top: 1px solid var(--border);
@@ -336,8 +302,8 @@
 
     @media (max-width: 600px) {
       /* Not enough width to open the search box inline next to the
-         title — stack the whole action bar below the intro instead
-         of letting it get squeezed or overlap. */
+         title; stack the whole action bar below the intro instead of
+         letting it get squeezed or overlap. */
       .top-row {
         flex-direction: column;
         align-items: flex-start;
@@ -348,15 +314,14 @@
       .header-actions { width: 100%; flex-wrap: wrap; gap: .45rem; }
 
       .stats-bar { gap: 1.1rem; }
-      .form-row { grid-template-columns: 1fr; }
       main { padding-left: 1rem; padding-right: 1rem; padding-bottom: 4rem; }
 
       .btn .btn-label { display: none; }
       .btn { padding: 0 .65rem; }
 
-      /* The search box now drops down below the icon row (full
-         content width) instead of expanding sideways, so it never
-         gets clipped by the edge of a narrow screen. */
+      /* The search box drops down below the icon row (full content
+         width) instead of expanding sideways, so it never gets
+         clipped by the edge of a narrow screen. */
       .header-search-input {
         right: auto; left: 0; top: 100%; transform: none;
         margin-top: .5rem;
@@ -368,7 +333,30 @@
       }
 
       .quote-actions { opacity: 1; }
-      .modal { padding: 1.6rem 1.15rem; }
+    }
+
+    /* Small phones (iPhone SE / Mini and similar ~360px-wide screens):
+       the 600px tier above is already active here, this just tightens
+       spacing and type-scale a bit further so nothing crowds or wraps
+       awkwardly on the narrowest devices. */
+    @media (max-width: 380px) {
+      .top-row { padding-left: .85rem; padding-right: .85rem; gap: .85rem; }
+      main { padding-left: .85rem; padding-right: .85rem; }
+      .intro h1 { font-size: 1.35rem; }
+      .stats-bar { gap: .85rem; }
+      .stat-num { font-size: 1.55rem; }
+      .quote-card { padding: 1.35rem 1.1rem 1rem; }
+      .header-search.open .header-search-input { width: calc(100vw - 1.7rem); }
+    }
+
+    /* Large / ultrawide monitors: let the content area breathe further
+       out instead of staying pinned at the same width, so the page
+       keeps filling the screen proportionally. */
+    @media (min-width: 1600px) {
+      :root { --content-max: 1520px; }
+    }
+    @media (min-width: 2000px) {
+      :root { --content-max: 1720px; }
     }
   </style>
 </head>
@@ -386,7 +374,7 @@
       <input
         class="header-search-input" id="search"
         placeholder="搜索金句或作者…"
-        oninput="render()"
+        oninput="onSearchInput()"
         onkeydown="if(event.key==='Escape')closeSearch()"
       />
       <button class="search-toggle" id="search-toggle" onclick="toggleSearch()" aria-label="搜索">
@@ -398,18 +386,6 @@
         </svg>
       </button>
     </div>
-    <button class="btn btn-ghost" onclick="openExport()">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M8 1v9M4 7l4 4 4-4M2 12v2h12v-2"/>
-      </svg>
-      <span class="btn-label">导出配置</span>
-    </button>
-    <button class="btn btn-primary" onclick="openAdd()">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M8 2v12M2 8h12"/>
-      </svg>
-      <span class="btn-label">添加金句</span>
-    </button>
   </div>
 </div>
 
@@ -443,79 +419,17 @@
   <div class="quote-grid fade-in" style="--i:5" id="quote-grid"></div>
 </main>
 
-<!-- ═══ ADD MODAL ═══ -->
-<div class="modal-backdrop" id="add-modal" onclick="closeOnBackdrop(event,'add-modal')">
-  <div class="modal">
-    <div class="modal-title">
-      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>
-      添加金句
-    </div>
-    <div class="form-group">
-      <label class="form-label">金句正文 *</label>
-      <textarea class="form-control" id="f-text" rows="4" placeholder="写下让你心动的句子…"></textarea>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">作者 / 来源</label>
-        <input class="form-control" id="f-author" type="text" placeholder="如：加缪" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">标签</label>
-        <input class="form-control" id="f-tag" type="text" placeholder="如：哲学" />
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('add-modal')">取消</button>
-      <button class="btn btn-primary" onclick="addQuote()">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ EXPORT MODAL ═══ -->
-<div class="modal-backdrop" id="export-modal" onclick="closeOnBackdrop(event,'export-modal')">
-  <div class="modal">
-    <div class="modal-title">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M8 3H5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V8m-4-5h4v4M10 12l4-4"/>
-      </svg>
-      导出 quotes.js
-    </div>
-    <p style="font-size:.88rem;color:var(--muted);line-height:1.75;">
-      将当前所有金句导出为新的配置文件。用它替换项目中的
-      <code style="font-family:'DM Mono',monospace;color:var(--accent-dark);font-size:.82rem">quotes.js</code>
-      并重新部署，即可永久保存所有改动。
-    </p>
-    <div class="export-actions">
-      <button class="btn btn-ghost" onclick="copyExport()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="5" y="5" width="9" height="9" rx="1"/><path d="M10 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h2"/>
-        </svg>
-        复制到剪贴板
-      </button>
-      <button class="btn btn-primary" onclick="downloadExport()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M8 1v9M4 7l4 4 4-4M2 12v2h12v-2"/>
-        </svg>
-        直接下载
-      </button>
-    </div>
-    <div class="modal-footer" style="margin-top:1.25rem;">
-      <button class="btn btn-ghost" onclick="closeModal('export-modal')">关闭</button>
-    </div>
-  </div>
-</div>
-
 <!-- ═══ FOOTER ═══ -->
 <footer>
   <div class="footer-links">
-    <a class="footer-author" href="https://minecraftxfj.top" target="_blank" rel="noopener">
+    <a class="footer-author" href="https://minecraftxfj.top" target="_blank" rel="noopener noreferrer">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
       </svg>
       Minecraft雪峰君
     </a>
     <div class="footer-dot"></div>
-    <a class="footer-github" href="https://github.com/XFJ-YYQF/Golden-Sentence-Collection" target="_blank" rel="noopener">
+    <a class="footer-github" href="https://github.com/XFJ-YYQF/Golden-Sentence-Collection" target="_blank" rel="noopener noreferrer">
       <svg viewBox="0 0 16 16" fill="currentColor">
         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
           0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
@@ -529,7 +443,7 @@
       GitHub
     </a>
   </div>
-  <a class="footer-powered" href="https://claude.ai" target="_blank" rel="noopener">
+  <a class="footer-powered" href="https://claude.ai" target="_blank" rel="noopener noreferrer">
     Powered by Claude
   </a>
 </footer>
@@ -539,36 +453,24 @@
 
 <script>
 // ─── DATA ──────────────────────────────────────────────────────────────
-const STORAGE_KEY = 'jinjulu_quotes';
+// Quotes live in Cloudflare KV, served through Pages Functions at
+// /api/quotes (see /functions). This page only ever reads — adding
+// and deleting quotes happens in the separate /admin dashboard, which
+// is the only place that needs the admin key.
 
-function loadAll() {
-  const base = (window.QUOTES_CONFIG || []);
-  let local = [];
-  try { local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){}
-  const map = new Map();
-  base.forEach(q => map.set(q.id, q));
-  local.forEach(q => map.set(q.id, q));
-  const arr = Array.from(map.values());
-  for (let i = arr.length - 1; i > 0; i--) {
+const API_BASE = '/api/quotes';
+
+async function fetchAllQuotes() {
+  const res = await fetch(API_BASE);
+  if (!res.ok) throw new Error('failed to load quotes');
+  const quotes = await res.json();
+  // Shuffle client-side only — the server keeps a stable stored order
+  // (newest first), the shuffle is purely a "surprise me" display touch.
+  for (let i = quotes.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    [quotes[i], quotes[j]] = [quotes[j], quotes[i]];
   }
-  return arr;
-}
-
-function saveLocal(quotes) {
-  const configIds = new Set((window.QUOTES_CONFIG||[]).map(q=>q.id));
-  const localOnly = quotes.filter(q => !configIds.has(q.id));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(localOnly));
-}
-
-function getDeletedIds() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY + '_deleted') || '[]'); } catch(e){ return []; }
-}
-function addDeletedId(id) {
-  const ids = getDeletedIds();
-  if (!ids.includes(id)) ids.push(id);
-  localStorage.setItem(STORAGE_KEY + '_deleted', JSON.stringify(ids));
+  return quotes;
 }
 
 let allQuotes = [];
@@ -582,10 +484,9 @@ function highlight(text, query) {
 
 // ─── RENDER ─────────────────────────────────────────────────────────
 function render() {
-  const deleted = new Set(getDeletedIds());
   const query = document.getElementById('search').value.trim().toLowerCase();
 
-  let list = allQuotes.filter(q => !deleted.has(q.id));
+  let list = allQuotes;
 
   if (activeTag !== 'all') list = list.filter(q => q.tag === activeTag);
   if (query) list = list.filter(q =>
@@ -604,9 +505,9 @@ function render() {
     return;
   }
 
-  // Rebuilt from an array + join, and copy/delete buttons carry only a
-  // data-id — no user text is ever interpolated into an HTML attribute,
-  // which is what silently broke the old copy button.
+  // Copy button carries only a data-id — no user text is ever
+  // interpolated into an HTML attribute, which is what silently broke
+  // the copy button in an earlier version of this page.
   grid.innerHTML = list.map((q, i) => `
     <div class="quote-card" style="--i:${i}; animation-delay:${i * 0.045}s">
       <div class="quote-text">${highlight(q.text, query)}</div>
@@ -618,14 +519,9 @@ function render() {
         <div style="display:flex;align-items:center;gap:.5rem;">
           ${q.tag ? `<span class="quote-tag">${escHtml(q.tag)}</span>` : ''}
           <div class="quote-actions">
-            <button class="icon-btn" title="复制" data-action="copy" data-id="${q.id}">
+            <button class="icon-btn" title="复制" data-id="${q.id}">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="5" y="5" width="9" height="9" rx="1"/><path d="M10 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h2"/>
-              </svg>
-            </button>
-            <button class="icon-btn del" title="删除" data-action="delete" data-id="${q.id}">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M3 4h10M6 4V2h4v2M13 4l-.8 9a1 1 0 01-1 .9H4.8a1 1 0 01-1-.9L3 4"/>
               </svg>
             </button>
           </div>
@@ -634,44 +530,37 @@ function render() {
     </div>`).join('');
 }
 
-// Delegated click handler for card actions — set once, works for every
-// card even after re-render, and never touches inline onclick strings.
+// Delegated click handler for the copy button — set once, works for
+// every card even after re-render.
 document.getElementById('quote-grid').addEventListener('click', (e) => {
   const btn = e.target.closest('.icon-btn');
   if (!btn) return;
-  const id = btn.dataset.id;
-  if (btn.dataset.action === 'copy') {
-    const q = allQuotes.find(x => x.id === id);
-    if (q) copyText(q.text);
-  } else if (btn.dataset.action === 'delete') {
-    deleteQuote(id);
-  }
+  const q = allQuotes.find(x => x.id === btn.dataset.id);
+  if (q) copyText(q.text);
 });
 
 function updateStats() {
-  const deleted = new Set(getDeletedIds());
-  const visible = allQuotes.filter(q => !deleted.has(q.id));
   const today = new Date().toISOString().slice(0,10);
-  document.getElementById('stat-total').textContent = visible.length;
-  document.getElementById('stat-tags').textContent = new Set(visible.map(q=>q.tag).filter(Boolean)).size;
-  document.getElementById('stat-today').textContent = visible.filter(q=>q.date===today).length;
+  document.getElementById('stat-total').textContent = allQuotes.length;
+  document.getElementById('stat-tags').textContent = new Set(allQuotes.map(q=>q.tag).filter(Boolean)).size;
+  document.getElementById('stat-today').textContent = allQuotes.filter(q=>q.date===today).length;
 }
 
 function buildTagPills() {
-  const deleted = new Set(getDeletedIds());
-  const visible = allQuotes.filter(q => !deleted.has(q.id));
-  const tags = [...new Set(visible.map(q=>q.tag).filter(Boolean))].sort();
+  const tags = [...new Set(allQuotes.map(q=>q.tag).filter(Boolean))].sort();
   const strip = document.getElementById('filter-strip');
   const pills = strip.querySelectorAll('.tag-pill:not([data-tag="all"])');
   pills.forEach(p => p.remove());
+  const frag = document.createDocumentFragment();
   tags.forEach(tag => {
     const btn = document.createElement('button');
     btn.className = 'tag-pill' + (activeTag === tag ? ' active' : '');
     btn.dataset.tag = tag;
     btn.textContent = tag;
     btn.onclick = () => filterTag(tag, btn);
-    strip.appendChild(btn);
+    frag.appendChild(btn);
   });
+  strip.appendChild(frag);
 }
 
 function filterTag(tag, el) {
@@ -681,78 +570,13 @@ function filterTag(tag, el) {
   render();
 }
 
-// ─── CRUD ───────────────────────────────────────────────────────────
-function addQuote() {
-  const text = document.getElementById('f-text').value.trim();
-  if (!text) { shake('f-text'); return; }
-  const today = new Date().toISOString().slice(0,10);
-  const q = {
-    id: 'q' + Date.now(),
-    text,
-    author: document.getElementById('f-author').value.trim(),
-    tag:    document.getElementById('f-tag').value.trim(),
-    date:   today
-  };
-  allQuotes.unshift(q);
-  saveLocal(allQuotes);
+// Single entry point for "the in-memory list changed" — refreshes the
+// tag pills, stats, and grid together after add/delete/initial load.
+function refreshUI() {
   buildTagPills();
   updateStats();
   render();
-  closeModal('add-modal');
-  toast('金句已收录 ✦');
 }
-
-function deleteQuote(id) {
-  addDeletedId(id);
-  allQuotes = allQuotes.filter(q => q.id !== id);
-  saveLocal(allQuotes);
-  buildTagPills();
-  updateStats();
-  render();
-  toast('已删除');
-}
-
-// ─── EXPORT ─────────────────────────────────────────────────────────
-let _exportContent = '';
-
-function buildExportContent() {
-  const deleted = new Set(getDeletedIds());
-  const visible = allQuotes.filter(q => !deleted.has(q.id));
-  return `/**\n * 金句配置文件\n * 由「金句录」自动生成 ${new Date().toISOString().slice(0,10)}\n */\n\nwindow.QUOTES_CONFIG = ${JSON.stringify(visible, null, 2)};\n`;
-}
-
-function openExport() {
-  _exportContent = buildExportContent();
-  openModal('export-modal');
-}
-
-function copyExport() {
-  copyToClipboard(_exportContent, () => {
-    toast('已复制到剪贴板 ✓');
-    closeModal('export-modal');
-  });
-}
-
-function downloadExport() {
-  const blob = new Blob([_exportContent], { type: 'text/javascript' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'quotes.js';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('下载已开始 ↓');
-  closeModal('export-modal');
-}
-
-// ─── MODAL ──────────────────────────────────────────────────────────
-function openAdd() {
-  ['f-text','f-author','f-tag'].forEach(id => document.getElementById(id).value='');
-  openModal('add-modal');
-}
-
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function closeOnBackdrop(e, id) { if (e.target.id === id) closeModal(id); }
 
 // ─── CLIPBOARD ──────────────────────────────────────────────────────
 // navigator.clipboard.writeText only works in a secure context
@@ -794,13 +618,6 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function shake(id) {
-  const el = document.getElementById(id);
-  el.style.animation = 'none';
-  el.style.borderColor = 'var(--danger)';
-  setTimeout(() => el.style.borderColor = '', 800);
-}
-
 function toast(msg) {
   const c = document.getElementById('toast-container');
   const t = document.createElement('div');
@@ -810,6 +627,15 @@ function toast(msg) {
 }
 
 // ─── HEADER SEARCH ──────────────────────────────────────────────────
+// Re-filtering/rebuilding the grid on every keystroke is wasted work
+// while someone is still mid-word — debounce so a fast typist only
+// triggers one render shortly after they pause, not one per character.
+let _searchDebounce = null;
+function onSearchInput() {
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(render, 120);
+}
+
 function toggleSearch() {
   const wrap = document.getElementById('header-search');
   const isOpen = wrap.classList.contains('open');
@@ -830,13 +656,13 @@ function closeSearch() {
   document.getElementById('search-icon').style.display  = '';
   document.getElementById('search-close').style.display = 'none';
   document.getElementById('search').value = '';
+  clearTimeout(_searchDebounce);
   render();
 }
 
 // Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    closeModal('add-modal'); closeModal('export-modal');
     closeSearch();
   }
   if ((e.metaKey||e.ctrlKey) && e.key === 'k') {
@@ -845,11 +671,15 @@ document.addEventListener('keydown', e => {
 });
 
 // ─── INIT ───────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  allQuotes = loadAll();
-  buildTagPills();
-  updateStats();
-  render();
+document.addEventListener('DOMContentLoaded', async () => {
+  const grid = document.getElementById('quote-grid');
+  grid.innerHTML = `<div class="empty"><div class="empty-glyph">「 」</div><p>正在加载…</p></div>`;
+  try {
+    allQuotes = await fetchAllQuotes();
+    refreshUI();
+  } catch (e) {
+    grid.innerHTML = `<div class="empty"><div class="empty-glyph">「 」</div><p>加载失败，请刷新重试</p></div>`;
+  }
 });
 </script>
 </body>
