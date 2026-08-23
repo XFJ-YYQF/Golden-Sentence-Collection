@@ -34,7 +34,6 @@ Powered By [Claude](https://claude.ai)
 │       ├── quotes.js              # GET / POST  /api/quotes
 │       ├── quotes/[id].js         # DELETE      /api/quotes/:id
 │       └── auth/verify.js         # POST        /api/auth/verify（仅校验密钥，不读写数据）
-├── seed-data.json                 # 迁移用：原 quotes.js 中的数据，首次部署时导入 KV
 ├── wrangler.toml                  # 本地开发 / wrangler 部署时的 KV 绑定配置
 └── _headers                       # 缓存与安全响应头
 ```
@@ -68,17 +67,7 @@ Settings → Environment variables → 新增变量：
 
 这个值就是你之后在 `/admin` 登录页面要输入的内容。没有它，任何人都不能添加或删除金句——包括你自己，所以设置完之后记得找个地方存好这个值。
 
-### 5. 迁移已有数据（可选，仅首次部署需要）
-
-如果你之前用的是旧版 `quotes.js`，仓库里的 `seed-data.json` 已经包含了那批数据。用 [wrangler](https://developers.cloudflare.com/workers/wrangler/) 一次性写入 KV：
-
-```bash
-wrangler kv key put --binding=QUOTES_KV "quotes" --path=./seed-data.json --remote
-```
-
-也可以直接在 Dashboard 的 KV 命名空间页面里，手动新建一个 key 名为 `quotes`，把 `seed-data.json` 的内容粘贴进去作为 value。
-
-### 6. 重新部署
+### 5. 重新部署
 
 触发一次新的部署（推一个空 commit 或在 Dashboard 点 Retry deployment），让 Functions 绑定生效。
 
