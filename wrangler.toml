@@ -11,7 +11,7 @@ pages_build_output_dir = "."
 # bindings.
 [[kv_namespaces]]
 binding = "QUOTES_KV"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "fe4e1c5ce5e64775b3c6b54313da845c"
 
 # ADMIN_KEY is a secret, not a plaintext var — set it with:
 #   wrangler pages secret put ADMIN_KEY
